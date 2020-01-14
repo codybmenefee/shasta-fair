@@ -1,0 +1,77 @@
+function VinAutoUpdate() {
+  //Establish Spreadsheet and Sheets
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var form = ss.getSheetByName("All Vehicle Update Form");
+  var Master = ss.getSheetByName("Current Vehicle Status");
+  
+  //VIN Columns on both sheets
+  var columnToCheckF = form.getRange("B:B").getValues();
+  var columnToCheckM = Master.getRange("B:B").getValues();
+  
+  
+  //Get Last Row on "Form"
+  var last = getLastRowSpecial(columnToCheckF);
+   Logger.log(last);
+  
+  
+  //Gets Most Recent Vin Submission on "Form"
+  var VIN = form.getRange(last, 2).getValue();
+  var DataRng = form.getRange(last,1,1,18).getValues(); // Gets all data
+  
+  // Return row number if Vin matches on "Form" and "Master Sheet 2.0", if no match VINmatch = 1
+  var VINmatch = matchVin(columnToCheckM,VIN)+1;
+  
+  
+  //If no Match, gets last row of "Master Sheet 2.0"
+  if (VINmatch == 1){
+    var NoVIN = getLastRowSpecial(columnToCheckM)+1;
+    
+    Master.getRange(NoVIN,1,1,18).setValues(DataRng);
+  }
+  else {
+    Master.getRange(VINmatch,1,1,18).setValues(DataRng);
+  };
+ 
+  Logger.log(VIN);
+  Logger.log(VINmatch);
+  Logger.log(NoVIN);
+}
+
+
+
+// Gets Row Number of last row with data
+function getLastRowSpecial(range){
+  var rowNum = 0;
+  var blank = false;
+  for(var row = 0; row < range.length; row++){
+ 
+    if(range[row][0] === "" && !blank){
+      rowNum = row;
+      blank = true;
+ 
+    }else if(range[row][0] !== ""){
+      blank = false;
+    };
+  };
+  return rowNum;
+}
+
+
+
+
+//Gets Row number of the row if the VINS match on "Form" and "Master Sheet 2.0"
+function matchVin(range,VIN){
+  var rowNum = 0;
+  var blank = false;
+  for(var row = 0; row < range.length; row++){
+ 
+    if(range[row][0] === VIN && !blank){
+      rowNum = row;
+      blank = true;
+ 
+    }else if(range[row][0] !== VIN){
+      blank = false;
+    };
+  };
+  return rowNum;
+}
